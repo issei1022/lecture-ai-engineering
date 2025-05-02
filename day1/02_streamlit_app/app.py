@@ -79,3 +79,8 @@ elif st.session_state.page == "サンプルデータ管理":
 # --- フッターなど（任意） ---
 st.sidebar.markdown("---")
 st.sidebar.info("開発者: [Your Name]")
+
+# --- モデル情報の表示を追加 ---
+st.sidebar.markdown("### 使用モデル")
+st.sidebar.text(MODEL_NAME)
+
