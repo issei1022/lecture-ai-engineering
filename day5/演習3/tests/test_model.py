@@ -181,7 +181,7 @@ def test_model_reproducibility(sample_data, preprocessor):
 
 
 def test_model_regression(train_model):
-    """モデルの回帰性能を検証"""
+    """モデルの性能を検証"""
     new_model, X_test, y_test = train_model
 
     new_pred = new_model.predict(X_test)
