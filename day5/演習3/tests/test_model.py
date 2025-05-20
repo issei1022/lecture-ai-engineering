@@ -16,6 +16,8 @@ from sklearn.pipeline import Pipeline
 DATA_PATH = os.path.join(os.path.dirname(__file__), "../data/Titanic.csv")
 MODEL_DIR = os.path.join(os.path.dirname(__file__), "../models")
 MODEL_PATH = os.path.join(MODEL_DIR, "titanic_model.pkl")
+# 新しいモデルのパス
+NEW_MODEL_PATH = os.path.join(MODEL_DIR, "new_titanic_model.pkl")
 
 
 @pytest.fixture
@@ -94,9 +96,14 @@ def train_model(sample_data, preprocessor):
     # モデルの学習
     model.fit(X_train, y_train)
 
-    # モデルの保存
+    # # モデルの保存
+    # os.makedirs(MODEL_DIR, exist_ok=True)
+    # with open(MODEL_PATH, "wb") as f:
+    #     pickle.dump(model, f)
+
+    # 新しいモデルの保存
     os.makedirs(MODEL_DIR, exist_ok=True)
-    with open(MODEL_PATH, "wb") as f:
+    with open(NEW_MODEL_PATH, "wb") as f:
         pickle.dump(model, f)
 
     return model, X_test, y_test
@@ -171,3 +178,24 @@ def test_model_reproducibility(sample_data, preprocessor):
     assert np.array_equal(
         predictions1, predictions2
     ), "モデルの予測結果に再現性がありません"
+
+
+def test_model_regression(train_model):
+    """モデルの回帰性能を検証"""
+    new_model, X_test, y_test = train_model
+
+    new_pred = new_model.predict(X_test)
+    new_accuracy = accuracy_score(y_test, new_pred)
+    if not os.path.exists(MODEL_PATH):
+        pytest.skip("旧モデルが存在しないためスキップします")
+
+    # 古いモデルの読み込み
+    with open(MODEL_PATH, "rb") as f:
+        old_model = pickle.load(f)
+    old_pred = old_model.predict(X_test)
+    old_accuracy = accuracy_score(y_test, old_pred)
+
+    assert new_accuracy >= old_accuracy, (
+        f"新しいモデルの精度が古いモデルよりも低いです: "
+        f"新しいモデル: {new_accuracy}, 古いモデル: {old_accuracy}"
+    )
